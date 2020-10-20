@@ -22,15 +22,15 @@ pub struct OrbitCamera {
 }
 
 impl OrbitCamera {
-    const MIN_DISTANCE: f32 = 5.0;
-    const MAX_DISTANCE: f32 = 100.0;
+    const MIN_DISTANCE: f32 = 5.0; // currently hardcoded
+    const MAX_DISTANCE: f32 = 100.0; // currently hardcoded
     const MAX_PITCH: f32 = 89.0 / 180.0 * PI; // 89 degrees
     const MIN_PITCH: f32 = -Self::MAX_PITCH; // -89 degrees
     const MAX_YAW: f32 = PI; // 180 degrees
     const MIN_YAW: f32 = -Self::MAX_YAW; // -180 degrees
     pub fn new(target: Option<Entity>, mut distance: f32, pitch: f32, yaw: f32) -> Self {
         distance = distance
-            .max(0.0)
+            .max(f32::EPSILON) // until I know otherwise, this should be sufficiently positive
             .max(Self::MIN_DISTANCE)
             .min(Self::MAX_DISTANCE);
         let focus = Vec3::default();
@@ -193,9 +193,6 @@ fn update_camera(
         if let Some(target_entity) = orbit_camera.target {
             if let Ok(target_transform) = target_query.get::<Transform>(target_entity) {
                 orbit_camera.focus = target_transform.translation;
-                orbit_camera.update_position();
-
-                // orbit_camera.focus = target_transform.translation;
             }
         }
     }
@@ -205,8 +202,7 @@ fn update_camera(
 fn move_camera(mut camera_query: Query<(&OrbitCamera, &mut Transform)>) {
     const UP: Vec3 = Vec3::unit_y();
     for (orbit_camera, mut transform) in &mut camera_query.iter() {
-        transform.translation = orbit_camera.position;
-        // transform.translation = orbit_camera.position();
+        transform.translation = orbit_camera.position();
         transform.look_at(orbit_camera.focus, UP);
     }
 }
