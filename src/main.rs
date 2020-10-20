@@ -1,3 +1,5 @@
+#![feature(external_doc)]
+#![doc(include = "../README.md")]
 // #![allow(dead_code)]
 use bevy::input::mouse::{MouseMotion, MouseWheel};
 use bevy::prelude::*;
@@ -11,19 +13,19 @@ pub struct OrbitCameraTarget;
 
 // core
 pub struct OrbitCamera {
-    /// Which entity the camera is target
+    /// Which entity the camera is targeting
     pub target: Option<Entity>,
-    /// What point in the world the camera was last facing
+    /// What point in the world the camera was last facing or should be facing
     pub focus: Vec3,
-    /// The distance the camera should be from the entity it is target
+    /// The distance the camera should be from the entity it is targeting
     distance: f32,
-    // The minimum distance away from the target, must be more than 0
+    // TODO: (maybe) The minimum distance away from the target, must be more than 0
     // min_distance: f32,
-    // The maximum distance away from the target, must be more than `min_distance`
+    // TODO: (maybe) The maximum distance away from the target, must be more than `min_distance`
     // max_distance: f32,
-    /// pitch aka aradians from negative XZ plane
+    /// The pitch, or, the angle in radians from the XZ plane in the Y-axis direction
     pitch: f32,
-    /// radians from positive Z axis
+    /// The yaw, or, the angle in radians from the positive Z-axis
     yaw: f32,
 }
 
@@ -103,7 +105,7 @@ impl OrbitCamera {
             num
         }
     }
-    // this should be part of bevy or glam
+    // this should maybe be part of bevy or glam
     fn calculate_relative_position(pitch: f32, yaw: f32, distance: f32) -> Vec3 {
         // https://stackoverflow.com/questions/52781607/3d-point-from-two-angles-and-a-distance
         let point = Vec3::new(
@@ -245,9 +247,12 @@ pub fn update_camera(
 }
 
 // core
-// TODO: make this smoother (i.e. use acceleration, deceleration and velocity)
-// TODO: make this lazier (i.e. position changes when)
-// https://catlikecoding.com/unity/tutorials/movement/orbit-camera/
+// This currently "snaps", which works for an editor, but not so nice for a game, so TODO: make this an option
+// TODO: make this smoother over time i.e. use acceleration, deceleration and velocity
+// TODO: make this lazier i.e. "look_at" changes only when the focus has deviated from
+// the target's origin by some radius, and "translation" changes only when the position
+// has deviated from the by some distance
+// TODO: The rest of this: https://catlikecoding.com/unity/tutorials/movement/orbit-camera/
 pub fn move_camera(mut camera_query: Query<(&OrbitCamera, &mut Transform)>) {
     for (orbit_camera, mut camera_transform) in &mut camera_query.iter() {
         camera_transform.translation = orbit_camera.position();
