@@ -7,8 +7,6 @@ pub struct OrbitCamera {
     pub target: Option<Entity>,
     /// What point in the world the camera was last facing
     pub focus: Vec3,
-    /// Where the camera should be
-    position: Vec3,
     /// The distance the camera should be from the entity it is target
     distance: f32,
     // The minimum distance away from the target, must be more than 0
@@ -34,11 +32,9 @@ impl OrbitCamera {
             .max(Self::MIN_DISTANCE)
             .min(Self::MAX_DISTANCE);
         let focus = Vec3::default();
-        let position = focus + Self::calculate_relative_position(pitch, yaw, distance);
         Self {
             target,
             focus,
-            position,
             distance,
             pitch,
             yaw,
@@ -83,10 +79,6 @@ impl OrbitCamera {
     }
     pub fn position(&self) -> Vec3 {
         self.focus + Self::calculate_relative_position(self.pitch, self.yaw, self.distance)
-    }
-    pub fn update_position(&mut self) -> &mut Self {
-        self.position = self.position();
-        self
     }
     fn wrap(num: f32, min: f32, max: f32) -> f32 {
         if num < min {
@@ -201,8 +193,8 @@ fn update_camera(
 // core
 fn move_camera(mut camera_query: Query<(&OrbitCamera, &mut Transform)>) {
     const UP: Vec3 = Vec3::unit_y();
-    for (orbit_camera, mut transform) in &mut camera_query.iter() {
-        transform.translation = orbit_camera.position();
-        transform.look_at(orbit_camera.focus, UP);
+    for (orbit_camera, mut camera_transform) in &mut camera_query.iter() {
+        camera_transform.translation = orbit_camera.position();
+        camera_transform.look_at(orbit_camera.focus, UP);
     }
 }
