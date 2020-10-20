@@ -192,19 +192,8 @@ fn update_camera(
     for mut orbit_camera in &mut camera_query.iter() {
         if let Some(target_entity) = orbit_camera.target {
             if let Ok(target_transform) = target_query.get::<Transform>(target_entity) {
-                let target_translation = target_transform.translation;
-                let OrbitCamera {
-                    position,
-                    focus,
-                    distance,
-                    ..
-                } = *orbit_camera;
-                orbit_camera.position =
-                    target_translation + (position - focus).normalize() * distance;
-                orbit_camera.focus = target_translation;
-
-                // orbit_camera.focus = target_transform.translation;
-                // orbit_camera.update_position();
+                orbit_camera.focus = target_transform.translation;
+                orbit_camera.update_position();
 
                 // orbit_camera.focus = target_transform.translation;
             }
